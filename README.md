@@ -129,6 +129,19 @@ rectangle), `label`, `options`, `fill` and `ink`, and draws itself relative to
 - If the shell crashes while `group` is on, `auto_group` stays off until
   `hyprctl reload`.
 
+## Remove
+
+Switch away from the `group` style first (or just remove the plugin: its
+groups are dissolved and `auto_group` restored when it unloads), then:
+
+```sh
+omarchy plugin remove nejcc.term-labels
+rm -f ~/.local/bin/tlabel ~/.local/state/term-labels.json
+```
+
+Also delete the `term-labels.lua` line from `~/.config/hypr/bindings.lua` and
+the `claude-label` hook from `~/.claude/settings.json` if you added them.
+
 ## Requirements
 
 Omarchy with Hyprland 0.55 or newer (Lua config), plus `jq`.
