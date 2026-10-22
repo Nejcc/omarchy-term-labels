@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Claude Code SessionStart hook: label this terminal window after the project.
+# Format from "autoLabel" on the plugin's shell.json entry:
+#   repo       spay                       (git repo name, else folder name)
+#   path       ~/projects/spay/app
+#   repo+path  spay · ~/projects/spay/app (default)
+# Silent no-op outside Hyprland.
+[[ -n ${HYPRLAND_INSTANCE_SIGNATURE-} ]] || exit 0
+cwd=$(jq -r '.cwd // empty')
+cwd=${cwd:-$PWD}
+repo=$(basename "$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null || echo "$cwd")")
+path=${cwd/#$HOME/\~}
+mode=$(jq -r '(.plugins // [])[] | select(.id == "nejcc.term-labels") | .autoLabel // empty' \
+  "$HOME/.config/omarchy/shell.json" 2>/dev/null)
+case ${mode:-repo+path} in
+  repo) label=$repo ;;
+  path) label=$path ;;
+  *) label="$repo · $path" ;;
+esac
+"$(dirname "$(readlink -f "$0")")/tlabel" "$label" >/dev/null 2>&1 || true

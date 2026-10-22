@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# tlabel <name...>  label the focused window (run it inside the terminal)
+# tlabel            clear the label
+# tlabel --rename   prompt for a new label for the focused window ("-" clears)
+set -euo pipefail
+f=${XDG_STATE_HOME:-$HOME/.local/state}/term-labels.json
+[[ -s $f ]] || echo '{}' >"$f"
+clients=$(hyprctl clients -j)
+live=$(jq -c '[.[].address]' <<<"$clients")
+addr=""
+if [[ ${1-} == --rename ]]; then
+  addr=$(hyprctl activewindow -j | jq -r '.address // empty')
+  [[ -n $addr ]] || exit 0
+  name=$(omarchy-menu-input "Window label (- clears)" --width 500) || exit 0 # Esc
+  [[ $name == - ]] && name=""
+  set -- "$name"
+fi
+# the window whose process is an ancestor of this shell; else the focused one
+pid=$$
+while [[ -z $addr && $pid -gt 1 ]]; do
+  addr=$(jq -r --argjson p "$pid" 'map(select(.pid == $p))[0].address // empty' <<<"$clients")
+  pid=$(ps -o ppid= -p "$pid" | tr -d ' ')
+done
+[[ -n $addr ]] || addr=$(hyprctl activewindow -j | jq -r .address)
+out=$(jq --arg a "$addr" --arg l "$*" --argjson live "$live" '
+  with_entries(select(.key as $k | $live | index($k)))
+  | if $l == "" then del(.[$a]) else .[$a] = $l end' "$f")
+# in-place write keeps the shell's file watch on the same inode
+printf '%s\n' "$out" >"$f"

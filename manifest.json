@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "nejcc.term-labels",
+  "name": "Terminal labels",
+  "version": "0.1.0",
+  "author": "Nejcc",
+  "license": "MIT",
+  "description": "Name your terminal windows: a coloured label on each one, set by hand or automatically from the project when Claude Code starts",
+  "kinds": [
+    "service"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml"
+  },
+  "homepage": "https://github.com/Nejcc/omarchy-term-labels",
+  "repository": "https://github.com/Nejcc/omarchy-term-labels"
+}
